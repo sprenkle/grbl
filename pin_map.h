@@ -28,34 +28,50 @@
 #ifdef PIN_MAP_ARDUINO_UNO // AVR 328p, Officially supported by Grbl.
 
   // Serial port pins
-  #define SERIAL_RX USART_RX_vect
-  #define SERIAL_UDRE USART_UDRE_vect
+  #define SERIAL_RX USART1_RX_vect
+  #define SERIAL_UDRE USART1_UDRE_vect
 
   // NOTE: All step bit and direction pins must be on the same port.
   #define STEPPING_DDR       DDRD
   #define STEPPING_PORT      PORTD
-  #define X_STEP_BIT         2  // Uno Digital Pin 2
-  #define Y_STEP_BIT         3  // Uno Digital Pin 3
+  #define X_STEP_BIT         1  // Uno Digital Pin 2
+  #define Y_STEP_BIT         0  // Uno Digital Pin 3
   #define Z_STEP_BIT         4  // Uno Digital Pin 4
-  #define X_DIRECTION_BIT    5  // Uno Digital Pin 5
-  #define Y_DIRECTION_BIT    6  // Uno Digital Pin 6
-  #define Z_DIRECTION_BIT    7  // Uno Digital Pin 7
+  #define Z_DIRECTION_BIT    5  // not implemented on D port
+  #define X_DIRECTION_BIT    6 // not implemented on D port
+  #define Y_DIRECTION_BIT    7  // Uno Digital Pin 6
   #define STEP_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)) // All step bits
   #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
   #define STEPPING_MASK (STEP_MASK | DIRECTION_MASK) // All stepping-related bits (step/direction)
 
+ // port e
+  #define E_STEPPING_DDR       DDRE
+  #define E_STEPPING_PORT      PORTE
+  #define E_Z_DIRECTION_BIT    6  // Uno Digital Pin 7
+  #define E_DIRECTION_MASK (1<<E_Z_DIRECTION_BIT) // All direction bits
+  #define E_STEPPING_MASK E_DIRECTION_MASK // All stepping-related bits (step/direction)
+
+// port c
+  #define C_STEPPING_DDR       DDRC
+  #define C_STEPPING_PORT      PORTC
+  #define C_X_DIRECTION_BIT    6 // Uno Digital Pin 5
+  #define C_DIRECTION_MASK (1<<C_X_DIRECTION_BIT)// All direction bits
+  #define C_STEPPING_MASK C_DIRECTION_MASK // All stepping-related bits (step/direction)
+
+
+
   #define STEPPERS_DISABLE_DDR    DDRB
   #define STEPPERS_DISABLE_PORT   PORTB
-  #define STEPPERS_DISABLE_BIT    0  // Uno Digital Pin 8
+  #define STEPPERS_DISABLE_BIT    4  // Uno Digital Pin 8
   #define STEPPERS_DISABLE_MASK (1<<STEPPERS_DISABLE_BIT)
 
   // NOTE: All limit bit pins must be on the same port
   #define LIMIT_DDR       DDRB
   #define LIMIT_PIN       PINB
   #define LIMIT_PORT      PORTB
-  #define X_LIMIT_BIT     1  // Uno Digital Pin 9
-  #define Y_LIMIT_BIT     2  // Uno Digital Pin 10
-  #define Z_LIMIT_BIT     3  // Uno Digital Pin 11
+  #define X_LIMIT_BIT     5  // Uno Digital Pin 9
+  #define Y_LIMIT_BIT     6  // Uno Digital Pin 10
+  #define Z_LIMIT_BIT     7  // Uno Digital Pin 11
   #define LIMIT_INT       PCIE0  // Pin change interrupt enable pin
   #define LIMIT_INT_vect  PCINT0_vect 
   #define LIMIT_PCMSK     PCMSK0 // Pin change interrupt register
@@ -83,12 +99,12 @@
   #endif  
 
   // NOTE: All pinouts pins must be on the same port
-  #define PINOUT_DDR       DDRC
-  #define PINOUT_PIN       PINC
-  #define PINOUT_PORT      PORTC
-  #define PIN_RESET        0  // Uno Analog Pin 0
-  #define PIN_FEED_HOLD    1  // Uno Analog Pin 1
-  #define PIN_CYCLE_START  2  // Uno Analog Pin 2
+  #define PINOUT_DDR       DDRF
+  #define PINOUT_PIN       PINF
+  #define PINOUT_PORT      PORTF
+  #define PIN_RESET        7  // Uno Analog Pin 0
+  #define PIN_FEED_HOLD    6  // Uno Analog Pin 1
+  #define PIN_CYCLE_START  5  // Uno Analog Pin 2
   #define PINOUT_INT       PCIE0  // Pin change interrupt enable pin
   #define PINOUT_INT_vect  PCINT1_vect
   #define PINOUT_PCMSK     PCMSK1 // Pin change interrupt register
@@ -100,8 +116,8 @@
 #ifdef PIN_MAP_ARDUINO_MEGA_2560 // Working @EliteEng
 
   // Serial port pins
-  #define SERIAL_RX USART0_RX_vect
-  #define SERIAL_UDRE USART0_UDRE_vect
+  #define SERIAL_RX USART1_RX_vect
+  #define SERIAL_UDRE USART1_UDRE_vect
 
   // Increase Buffers to make use of extra SRAM
   #define RX_BUFFER_SIZE 256

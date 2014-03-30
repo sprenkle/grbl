@@ -75,19 +75,19 @@ void protocol_execute_startup()
 // only the runtime command execute variable to have the main program execute these when 
 // its ready. This works exactly like the character-based runtime commands when picked off
 // directly from the incoming serial data stream.
-ISR(PINOUT_INT_vect) 
-{
-  // Enter only if any pinout pin is actively low.
-  if ((PINOUT_PIN & PINOUT_MASK) ^ PINOUT_MASK) { 
-    if (bit_isfalse(PINOUT_PIN,bit(PIN_RESET))) {
-      mc_reset();
-    } else if (bit_isfalse(PINOUT_PIN,bit(PIN_FEED_HOLD))) {
-      sys.execute |= EXEC_FEED_HOLD; 
-    } else if (bit_isfalse(PINOUT_PIN,bit(PIN_CYCLE_START))) {
-      sys.execute |= EXEC_CYCLE_START;
-    }
-  }
-}
+//ISR(PINOUT_INT_vect) 
+//{
+//  // Enter only if any pinout pin is actively low.
+//  if ((PINOUT_PIN & PINOUT_MASK) ^ PINOUT_MASK) { 
+////    if (bit_isfalse(PINOUT_PIN,bit(PIN_RESET))) {
+//      mc_reset();
+//    } else if (bit_isfalse(PINOUT_PIN,bit(PIN_FEED_HOLD))) {
+//      sys.execute |= EXEC_FEED_HOLD; 
+//    } else if (bit_isfalse(PINOUT_PIN,bit(PIN_CYCLE_START))) {
+//      sys.execute |= EXEC_CYCLE_START;
+//    }
+//  }
+//}
 
 // Executes run-time commands, when required. This is called from various check points in the main
 // program, primarily where there may be a while loop waiting for a buffer to clear space or any

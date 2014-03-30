@@ -46,16 +46,27 @@ int main(void)
 {
   // Initialize system
   serial_init(); // Setup serial baud rate and interrupts
+
+
   settings_init(); // Load grbl settings from EEPROM
   st_init(); // Setup stepper pins and interrupt timers
   sei(); // Enable interrupts
-  
+  //
   memset(&sys, 0, sizeof(sys));  // Clear all system variables
   sys.abort = true;   // Set abort to complete initialization
   sys.state = STATE_INIT;  // Set alarm state to indicate unknown initial position
-  
+  //uint8_t line[6];
+  //line[0] = 'p';
+  //line[1] = 'i';
+  //line[2] = 'g';
+  //line[3] = 'g';
+  //line[4] = 'y';
+  //line[5] = '\n';
+
+  //char *line = "Piggy Wiggy";
+
   for(;;) {
-  
+  //serial_write(&line);
     // Execute system reset upon a system abort, where the main program will return to this loop.
     // Once here, it is safe to re-initialize the system. At startup, the system will automatically
     // reset to finish the initialization process.

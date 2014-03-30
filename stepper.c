@@ -98,7 +98,7 @@ void st_wake_up()
       // Set total step pulse time after direction pin set. Ad hoc computation from oscilloscope.
       step_pulse_time = -(((settings.pulse_microseconds+STEP_PULSE_DELAY-2)*TICKS_PER_MICROSECOND) >> 3);
       // Set delay between direction pin write and step command.
-      OCR2A = -(((settings.pulse_microseconds)*TICKS_PER_MICROSECOND) >> 3);
+      OCR0A = -(((settings.pulse_microseconds)*TICKS_PER_MICROSECOND) >> 3);
     #else // Normal operation
       // Set step pulse time. Ad hoc computation from oscilloscope. Uses two's complement.
       step_pulse_time = -(((settings.pulse_microseconds-2)*TICKS_PER_MICROSECOND) >> 3);
@@ -149,6 +149,17 @@ ISR(TIMER1_COMPA_vect)
   if (busy) { return; } // The busy-flag is used to avoid reentering this interrupt
   
   // Set the direction pins a couple of nanoseconds before we step the steppers
+  if(out_bits & (1<<Z_DIRECTION_BIT))
+	E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | E_DIRECTION_MASK;
+  else
+	E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | ~E_DIRECTION_MASK;
+
+  if(out_bits & (1<<X_DIRECTION_BIT))
+	C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | C_DIRECTION_MASK;
+  else
+	C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | ~C_DIRECTION_MASK;
+	
+
   STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
   // Then pulse the stepping pins
   #ifdef STEP_PULSE_DELAY
@@ -158,8 +169,8 @@ ISR(TIMER1_COMPA_vect)
   #endif
   // Enable step pulse reset timer so that The Stepper Port Reset Interrupt can reset the signal after
   // exactly settings.pulse_microseconds microseconds, independent of the main Timer1 prescaler.
-  TCNT2 = step_pulse_time; // Reload timer counter
-  TCCR2B = (1<<CS21); // Begin timer2. Full speed, 1/8 prescaler
+  TCNT0 = step_pulse_time; // Reload timer counter
+  TCCR0B = (1<<CS21); // Begin timer2. Full speed, 1/8 prescaler
 
   busy = true;
   // Re-enable interrupts to allow ISR_TIMER2_OVERFLOW to trigger on-time and allow serial communications
@@ -318,11 +329,11 @@ ISR(TIMER1_COMPA_vect)
 // a few microseconds, if they execute right before one another. Not a big deal, but can
 // cause issues at high step rates if another high frequency asynchronous interrupt is 
 // added to Grbl.
-ISR(TIMER2_OVF_vect)
+ISR(TIMER0_OVF_vect)
 {
   // Reset stepping pins (leave the direction pins)
   STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (settings.invert_mask & STEP_MASK); 
-  TCCR2B = 0; // Disable Timer2 to prevent re-entering this interrupt when it's not needed. 
+  TCCR0B = 0; // Disable Timer2 to prevent re-entering this interrupt when it's not needed. 
 }
 
 #ifdef STEP_PULSE_DELAY
@@ -331,7 +342,7 @@ ISR(TIMER2_OVF_vect)
   // will then trigger after the appropriate settings.pulse_microseconds, as in normal operation.
   // The new timing between direction, step pulse, and step complete events are setup in the
   // st_wake_up() routine.
-  ISR(TIMER2_COMPA_vect) 
+  ISR(TIMER0_COMPA_vect) 
   { 
     STEPPING_PORT = step_bits; // Begin step pulse.
   }
@@ -354,6 +365,11 @@ void st_init()
   STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | settings.invert_mask;
   STEPPERS_DISABLE_DDR |= 1<<STEPPERS_DISABLE_BIT;
 
+  E_STEPPING_DDR |= E_STEPPING_MASK;
+  E_STEPPING_PORT = (E_STEPPING_PORT & ~E_STEPPING_MASK);
+  C_STEPPING_DDR |= C_STEPPING_MASK;
+  C_STEPPING_PORT = (C_STEPPING_PORT & ~C_STEPPING_MASK);
+
   // waveform generation = 0100 = CTC
   TCCR1B &= ~(1<<WGM13);
   TCCR1B |=  (1<<WGM12);
@@ -365,11 +381,11 @@ void st_init()
   TCCR1A &= ~(3<<COM1B0); 
 	
   // Configure Timer 2
-  TCCR2A = 0; // Normal operation
-  TCCR2B = 0; // Disable timer until needed.
-  TIMSK2 |= (1<<TOIE2); // Enable Timer2 Overflow interrupt     
+  TCCR0A = 0; // Normal operation
+  TCCR0B = 0; // Disable timer until needed.
+  TIMSK0 |= (1<<TOIE0); // Enable Timer2 Overflow interrupt     
   #ifdef STEP_PULSE_DELAY
-    TIMSK2 |= (1<<OCIE2A); // Enable Timer2 Compare Match A interrupt
+    TIMSK0 |= (1<<OCIE0A); // Enable Timer2 Compare Match A interrupt
   #endif
 
   // Start in the idle state, but first wake up to check for keep steppers enabled option.

@@ -32,6 +32,7 @@ uint8_t rx_buffer[RX_BUFFER_SIZE];
 uint8_t rx_buffer_head = 0;
 volatile uint8_t rx_buffer_tail = 0;
 
+
 uint8_t tx_buffer[TX_BUFFER_SIZE];
 uint8_t tx_buffer_head = 0;
 volatile uint8_t tx_buffer_tail = 0;
@@ -79,7 +80,7 @@ void serial_write(uint8_t data) {
 
   // Wait until there is space in the buffer
   while (next_head == tx_buffer_tail) { 
-    if (sys.execute & EXEC_RESET) { return; } // Only check for abort to avoid an endless loop.
+   // if (sys.execute & EXEC_RESET) { return; } // Only check for abort to avoid an endless loop.
   }
 
   // Store data and advance head
