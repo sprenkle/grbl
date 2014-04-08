@@ -199,6 +199,19 @@ static void homing_cycle(uint8_t cycle_mask, int8_t pos_dir, bool invert_pin, fl
     if (!(cycle_mask) || (sys.execute & EXEC_RESET)) { return; }
         
     // Perform step.
+
+	if(out_bits & (1<<Z_DIRECTION_BIT))
+		E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | E_DIRECTION_MASK;
+	else
+		E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | ~E_DIRECTION_MASK;
+
+	if(out_bits & (1<<X_DIRECTION_BIT))
+		C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | C_DIRECTION_MASK;
+	else
+		C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | ~C_DIRECTION_MASK;
+
+
+
     STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (out_bits & STEP_MASK);
     delay_us(settings.pulse_microseconds);
     STEPPING_PORT = out_bits0;
