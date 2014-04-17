@@ -39,9 +39,9 @@ class Redirector:
 
     def reader(self):
         """loop forever and copy serial->socket"""
-        self.serial.readline();
-        self.serial.readline();
-        self.serial.write("\n");
+        n = self.serial.inWaiting();
+        self.serial.read(n);
+        self.serial.write(chr(24)+"\n");
         while self.alive:
             try:
                 data = self.serial.read(1)              # read one, blocking
