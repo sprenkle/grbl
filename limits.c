@@ -147,8 +147,8 @@ static void homing_cycle(uint8_t cycle_mask, int8_t pos_dir, bool invert_pin, fl
       
   // Set default out_bits. 
   uint8_t out_bits0 = settings.invert_mask;
-  out_bits0 ^= (settings.homing_dir_mask & DIRECTION_MASK); // Apply homing direction settings
-  if (!pos_dir) { out_bits0 ^= DIRECTION_MASK; }   // Invert bits, if negative dir.
+  out_bits0 ^= (settings.homing_dir_mask & DIRECTION_MASK2); // Apply homing direction settings
+  if (!pos_dir) { out_bits0 ^= DIRECTION_MASK2; }   // Invert bits, if negative dir.
   
   // Initialize stepping variables
   int32_t counter_x = -(step_event_count >> 1); // Bresenham counters
@@ -199,23 +199,22 @@ static void homing_cycle(uint8_t cycle_mask, int8_t pos_dir, bool invert_pin, fl
     if (!(cycle_mask) || (sys.execute & EXEC_RESET)) { return; }
         
     // Perform step.
+    STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (out_bits & STEP_MASK);
 
-	if(out_bits & (1<<Z_DIRECTION_BIT))
+	delay_us(settings.pulse_microseconds);
+	
+	if(out_bits0 & (1<<Z_DIRECTION_BIT))
 		E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | E_DIRECTION_MASK;
 	else
 		E_STEPPING_PORT = (E_STEPPING_PORT & ~E_DIRECTION_MASK) | ~E_DIRECTION_MASK;
 
-	if(out_bits & (1<<X_DIRECTION_BIT))
+	if(out_bits0 & (1<<X_DIRECTION_BIT))
 		C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | C_DIRECTION_MASK;
 	else
 		C_STEPPING_PORT = (C_STEPPING_PORT & ~C_DIRECTION_MASK) | ~C_DIRECTION_MASK;
-
-
-
-    STEPPING_PORT = (STEPPING_PORT & ~STEP_MASK) | (out_bits & STEP_MASK);
-    delay_us(settings.pulse_microseconds);
     STEPPING_PORT = out_bits0;
-    delay_us(step_delay);
+
+	delay_us(step_delay);
     
     // Track and set the next step delay, if required. This routine uses another Bresenham
     // line algorithm to follow the constant acceleration line in the velocity and time 
